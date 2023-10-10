@@ -257,10 +257,10 @@ datAll$variable <- factor(datAll$variable,levels=c("G","D","H"))
 histX <- ggplot(datAll, aes(x=counts, color=offset)) +
   geom_histogram(fill="white", alpha=0.5, position="identity") +
   ylab("frequency") + xlab("offset") +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank(),
-        legend.title = element_blank())+
+  theme(#axis.title.y=element_blank(),
+  axis.text.y=element_blank(),
+  axis.ticks.y=element_blank(),
+  legend.title = element_blank())+
   scale_color_discrete(labels = c("m2019-DA2019", "s2019-DA2019"))
 
 histMap <- histX + facet_grid(cols = vars(variable), rows = vars(site))+theme(legend.position="bottom")

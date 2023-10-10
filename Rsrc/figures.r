@@ -14,6 +14,7 @@ print("define tileX. example: tileX <- '35VLJ'")
 tiles <- c("35VLJ", "34VEQ", "35WMN")
 sites <- c("Tampere","Vaasa","Oulu")
 pathX <- "C:/Users/minunno/Documents/research/assessCarbon/"
+errCalFlag <- T
 # CSCrun=TRUE
 # if(CSCrun==TRUE){
 #   pathX <- "/scratch/project_2000994/PREBASruns/assessCarbon/"
@@ -39,8 +40,11 @@ stAll <- data.table()
 pRMSE <- list()
 nSample <- 100000
 colX <- c("#0E95A5","#28B209","#DFB021","#ff8533")
-
-load(paste0(pathX,"results/dataRes2019.rdata"))
+if(errCalFlag){
+  load(paste0(pathX,"results/dataRes2019_ErrCal.rdata"))
+}else{
+  load(paste0(pathX,"results/dataRes2019_noErrCal.rdata"))
+}
 for(i in 1:length(tiles)){
   tileX <- tiles[i]
   #####Figure 1 reseults 
@@ -155,8 +159,14 @@ for(i in 1:length(tiles)){
   tabBias[18,i] <- bias(data2019res$BL[nas],data2019res$perBda2019[nas])
 }
 
-write.csv(t(rbind(tabPrmse,tabPbias)),file=paste0(pathX,"tab1_a.csv"))
-write.csv(t(rbind(tabRmse,tabBias)),file=paste0(pathX,"tab1_b.csv"))
+if(errCalFlag){
+  write.csv(t(rbind(tabPrmse,tabPbias)),file=paste0(pathX,"tab1_a_ErrCal.csv"))
+  write.csv(t(rbind(tabRmse,tabBias)),file=paste0(pathX,"tab1_b_ErrCal.csv"))
+  load(paste0(pathX,"results/dataRes2019_ErrCal.rdata"))
+}else{
+  write.csv(t(rbind(tabPrmse,tabPbias)),file=paste0(pathX,"tab1_a_noErrCal.csv"))
+  write.csv(t(rbind(tabRmse,tabBias)),file=paste0(pathX,"tab1_b_noErrCal.csv"))
+}
 
 MSEall <- data.table()
 for(i in 1:length(tiles)){
@@ -310,8 +320,12 @@ figRes1c
 # ggsave(resFig1,filename = paste0(pathX,"/figures/resFig1.png"),device = "png")
 # ggsave(figRes1a,filename = paste0(pathX,"/figures/resFig1pRMSE.png"),device = "png")
 # ggsave(figRes1b,filename = paste0(pathX,"figures/resFig1rmse"),device = "png")
-ggsave(figRes1c,filename = paste0(pathX,"/results/figures/resFig1mse.png"),device = "png",height=5,width=5)
 
+if(errCalFlag){
+  ggsave(figRes1c,filename = paste0(pathX,"/results/figures/resFig1mse_ErrCal.png"),device = "png",height=5,width=5)
+}else{
+  ggsave(figRes1c,filename = paste0(pathX,"/results/figures/resFig1mse_noErrCal.png"),device = "png",height=5,width=5)
+}
 # ggsave(figRes1b,filename = "resFig1rmse",device = "png")
 
 # stPlot <- ggplot(stAll) + 
@@ -330,8 +344,13 @@ stPlot <- ggplot(stAll, aes(x=siteClass, y=value)) +
 figRes2 <- stPlot + facet_grid( cols = vars(site),rows = vars(run)) 
 figRes2
 
-ggsave(figRes2,filename = paste0(pathX,"/results/figures/resFig2.png"),
-       device = "png",width = 7,h=7)
+if(errCalFlag){
+  ggsave(figRes2,filename = paste0(pathX,"/results/figures/resFig2_ErrCal.png"),
+         device = "png",width = 7,h=7)
+}else{
+  ggsave(figRes2,filename = paste0(pathX,"/results/figures/resFig2_noErrCal.png"),
+         device = "png",width = 7,h=7)
+}
 
 xpX <- dataPlot <- list()
 
@@ -361,8 +380,14 @@ pSC2 <- ggplot(data=xy, aes(x=siteClass, y=prob, color=run,group=run)) +
 pSC2
 figRes2.1 <- ggarrange(pSC1,pSC2,common.legend = T)
 
-ggsave(figRes2.1,filename = paste0(pathX,"/results/figures/resFig2.1.png"),
-       device = "png",width = 7,height=7)
+
+if(errCalFlag){
+  ggsave(figRes2.1,filename = paste0(pathX,"/results/figures/resFig2.1_ErrCal.png"),
+         device = "png",width = 7,height=7)
+}else{
+  ggsave(figRes2.1,filename = paste0(pathX,"/results/figures/resFig2.1_noErrCal.png"),
+         device = "png",width = 7,height=7)
+}
 
 
 
@@ -445,10 +470,19 @@ for(i in 1:length(tiles)){
     figRes3c
     figRes3d
     
-    ggsave(figRes3a,filename = paste0(pathX,"results/figures/resFig3a.png"),device = "png",width = 7,h=5)
-    ggsave(figRes3b,filename = paste0(pathX,"results/figures/resFig3b.png"),device = "png",width = 7,h=5)
-    ggsave(figRes3c,filename = paste0(pathX,"results/figures/resFig3c.png"),device = "png",width = 7,h=5)
-    ggsave(figRes3d,filename = paste0(pathX,"results/figures/resFig3d.png"),device = "png",width = 7,h=5)
+    
+    if(errCalFlag){
+      ggsave(figRes3a,filename = paste0(pathX,"results/figures/resFig3a_ErrCal.png"),device = "png",width = 7,h=5)
+      ggsave(figRes3b,filename = paste0(pathX,"results/figures/resFig3b_ErrCal.png"),device = "png",width = 7,h=5)
+      ggsave(figRes3c,filename = paste0(pathX,"results/figures/resFig3c_ErrCal.png"),device = "png",width = 7,h=5)
+      ggsave(figRes3d,filename = paste0(pathX,"results/figures/resFig3d_ErrCal.png"),device = "png",width = 7,h=5)
+    }else{
+      ggsave(figRes3a,filename = paste0(pathX,"results/figures/resFig3a_noErrCal.png"),device = "png",width = 7,h=5)
+      ggsave(figRes3b,filename = paste0(pathX,"results/figures/resFig3b_noErrCal.png"),device = "png",width = 7,h=5)
+      ggsave(figRes3c,filename = paste0(pathX,"results/figures/resFig3c_noErrCal.png"),device = "png",width = 7,h=5)
+      ggsave(figRes3d,filename = paste0(pathX,"results/figures/resFig3d_noErrCal.png"),device = "png",width = 7,h=5)
+    }
+    
     
 
 ##Maps and hist
