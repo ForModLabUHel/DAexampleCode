@@ -13,11 +13,11 @@ maxSitesRunTest <- 20000
 saveVars <- c(1,11:13,17,30,43,44) ####select variables to save
 varHD <- FALSE #### if true will vary H and D of pine and spruce using siteType
 
-###library path in CSC project_2000994
-if(CSCrun){
-  .libPaths(c("/projappl/project_2000994/project_rpackages", .libPaths()))
-  libpath <- .libPaths()[1]
-}
+# ###library path in CSC project_2000994
+# if(CSCrun){
+#   .libPaths(c("/projappl/project_2000994/project_rpackages", .libPaths()))
+#   libpath <- .libPaths()[1]
+# }
 
 ##load libraries
 library(lfda)
