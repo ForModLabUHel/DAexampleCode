@@ -1,12 +1,12 @@
 ###choose PREBAS version
-vPREBAS <- "v0.3.0"   #### choose PREBAS verson to run the model  "master"
+# vPREBAS <- "v0.3.0"   #### choose PREBAS verson to run the model  "master"
 
 
 #####Settings####
 testRun = T ####set to TRUE to test the code on a small raster proportion
-if(!exists("CSCrun")){
-  CSCrun = F ### set to TRUE if you are running on CSC
-}
+# if(!exists("CSCrun")){
+#   CSCrun = F ### set to TRUE if you are running on CSC
+# }
 fracTest <- 0.2 ###fraction of test area
 maxSitesRun <- 20000
 maxSitesRunTest <- 20000
@@ -38,13 +38,13 @@ library(abind)
 
 
 ###check prebas version and install if needed
-if(!CSCrun){
-  devtools::install_github("ForModLabUHel/Rprebasso", ref=vPREBAS)
-}
-require(Rprebasso)
+# if(!CSCrun){
+#   devtools::install_github("ForModLabUHel/Rprebasso", ref=vPREBAS)
+# }
+# require(Rprebasso)
 
 ####indicate rasterPath and climID path
-generalPath <- "C:/Users/minunno/Documents/research/assessCarbon/data/Finland/AC_training_FI_34VEQ/"
+generalPath <- "C:/Users/minunno/Documents/github/DAexampleCode/"
 rasterPath <- paste0(generalPath,"rasters/")
 procDataPath <- paste0(generalPath,"procData/")
 outPath <- paste0(generalPath,"output/")
@@ -64,23 +64,22 @@ yearEnd <- 2019     #2024
 ####indicate raster files
 tileX = "34VEQ"
 areaID <- "FI"
-baRast <-  paste0(rasterPath,areaID,"_",tileX,"-",startingYear,"_BA_10M_1CHS_8BITS.tif")
-blPerRast <- paste0(rasterPath,areaID,"_",tileX,"-",startingYear,"_BLP_10M_1CHS_8BITS.tif")
-dbhRast <- paste0(rasterPath,areaID,"_",tileX,"-",startingYear,"_DIA_10M_1CHS_8BITS.tif")
-vRast <- paste0(rasterPath,areaID,"_",tileX,"-",startingYear,"_GSV_10M_1CHS_16BITS.tif")
-hRast <- paste0(rasterPath,areaID,"_",tileX,"-",startingYear,"_HGT_10M_1CHS_16BITS.tif")
-pinePerRast <- paste0(rasterPath,areaID,"_",tileX,"-",startingYear,"_P_pine_10M_1CHS_8BITS.tif")
-sprucePerRast <- paste0(rasterPath,areaID,"_",tileX,"-",startingYear,"_P_spruce_10M_1CHS_8BITS.tif")
-siteTypeRast <- paste0(rasterPath,areaID,"_",tileX,"-",startingYear,"_SITE_10M_1CHS_8BITS.tif")
-siteTypeRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_SITE_10M_1CHS_8BITS.tif")
-vRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_GSV_10M_1CHS_16BITS.tif")
-baRast2 <-  paste0(rasterPath,areaID,"_",tileX,"-",year2,"_BA_10M_1CHS_8BITS.tif")
-dbhRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_DIA_10M_1CHS_8BITS.tif")
-hRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_HGT_10M_1CHS_16BITS.tif")
-pinePerRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_P_pine_10M_1CHS_8BITS.tif")
-sprucePerRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_P_spruce_10M_1CHS_8BITS.tif")
-blPerRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_BLP_10M_1CHS_8BITS.tif")
-mgmtmaskRast <- paste0(rasterPath, areaID, "_", tileX, "_mgmtmask.tif")
+baRast <-  "raster/baRast.tif"
+blPerRast <- "raster/blPerRast.tif"
+dbhRast <- "raster/dbhRast.tif"
+vRast <- "raster/vRast.tif"
+hRast <- "raster/hRast.tif"
+pinePerRast <- "raster/pinePerRast.tif"
+sprucePerRast <- "raster/sprucePerRast.tif"
+siteTypeRast <- "raster/siteTypeRast.tif"
+siteTypeRast2 <- "raster/siteTypeRast2.tif"
+vRast2 <- "raster/vRast2.tif"
+baRast2 <-  "raster/baRast2.tif"
+dbhRast2 <- "raster/dbhRast2.tif"
+hRast2 <- "raster/hRast2.tif"
+pinePerRast2 <- "raster/pinePerRast2.tif"
+sprucePerRast2 <- "raster/sprucePerRast2.tif"
+blPerRast2 <- "raster/blPerRast2.tif"
 
 # Source of tile-specific settings. Defined in batch job script. When set to TRUE will overwrite the tile-specific 
 # settings in this script (lines: 41-49, 53-56, 72-81) with settings from filepath in mySettings variable.
