@@ -45,10 +45,10 @@ library(abind)
 
 ####indicate rasterPath and climID path
 # generalPath <- "C:/Users/minunno/Documents/github/DAexampleCode/"
-rasterPath <- paste0(generalPath,"rasters/")
-procDataPath <- paste0(generalPath,"procData/")
-outPath <- paste0(generalPath,"output/")
-initPrebasPath <- paste0(generalPath,"initPrebas/")
+rasterPath <- "rasters/"#paste0(generalPath,"rasters/")
+procDataPath <- "procData/"#paste0(generalPath,"procData/")
+outPath <- "output/"#  paste0(generalPath,"output/")
+initPrebasPath <- "initPrebas/" #paste0(generalPath,"initPrebas/")
 # climatepath = "C:/Users/minunno/Documents/research/extarctWeather/inputs/" #### local fm
 # climatepath = "/scratch/project_2000994/RCP/" ####on CSC
 # climIDpath <- "C:/Users/minunno/Documents/research/FinSeg/some stuff/climID10km.tif"
