@@ -1,5 +1,6 @@
-# Run setting file 
 library(devtools)
+
+# Run general setting file 
 source_url("https://raw.githubusercontent.com/ForModLabUHel/DAexampleCode/master/Rsrc/settings.r")
 
 # load file with functions
@@ -7,19 +8,7 @@ source_url("https://raw.githubusercontent.com/ForModLabUHel/DAexampleCode/master
 
 nSample = 1000 ###number of samples from the error distribution
 
-###check and create output directories
-# # mkfldr <- paste0(procDataPath,"init",startingYear,"/calST_split/")
-# if(!dir.exists(file.path(mkfldr))){
-#   dir.create(file.path(mkfldr), recursive = TRUE)
-# }
-# setwd(generalPath)
-
-# yearX <- 3
-# Load unique data.
-# If data is processed in split parts, define to variable split_id which split part to process (in batch job script).
-# If splitRun is not needed, the unique data dataset for the whole tile is loaded.
 ####load input data
-##!! I can make a script that process the rasters
 load(url("https://raw.githubusercontent.com/ForModLabUHel/DAexampleCode/master/procData/init2016/DA2019/allData.rdata"))
 
 ####load error models
@@ -84,7 +73,7 @@ system.time({
   probit2 <- predict(step.probit2,type='p',dataSurMod[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
   
   
-  ###combine the different sources of information
+  ###DA: combine the different sources of information
   stProb <- array(NA, dim=c(nSeg,5,3))
   stProb[,,1] <- probit1
   stProb[,,2] <- probit2
