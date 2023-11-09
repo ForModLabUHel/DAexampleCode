@@ -11,11 +11,11 @@ load(url("https://raw.githubusercontent.com/ForModLabUHel/DAexampleCode/master/d
 
 
 # Create folders for outputs.
-setwd(generalPath)
+# setwd(generalPath)
   
 mkfldr <- paste0("procData/",paste0("init",startingYear,"/DA",year2))
-if(!dir.exists(file.path(generalPath, mkfldr))) {
-  dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
+if(!dir.exists(file.path(mkfldr))) {
+  dir.create(file.path(mkfldr), recursive = TRUE)
 }
 
 
@@ -178,7 +178,8 @@ data.all[,dDBHy := (dbh2-dbh)/(year2 - startingYear)]
 #                                  pineP2, spruceP2,blp2)]
 
 ####Count segID pix
-data.all[, npix:=.N, segID]
+data.all$segID <- 1:nrow(data.all)
+# data.all[, npix:=.N, segID]
 
 # # uniqueData <- data.table()
 # ####find unique initial conditions
@@ -225,7 +226,7 @@ XYsegID <- data.all[,.(x,y,segID)]
 #   segID <- c(segID,sampleX$segID)
 # }
 
-save(data.all,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"/allData.rdata"))         ### All data
+save(data.all,XYsegID,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"/allData.rdata"))         ### All data
 # save(uniqueData,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"/uniqueData.rdata"))    ### unique pixel combination to run in PREBAS
 # save(samples,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"/samples.rdata"))    ### unique pixel combination to run in PREBAS
 # save(XYsegID,segID,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"/XYsegID.rdata"))    ### Coordinates and segID of all pixels

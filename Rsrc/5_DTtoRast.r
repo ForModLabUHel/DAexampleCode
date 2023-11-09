@@ -28,8 +28,8 @@ load("posterior/pMvn_FSV_split1.rdata")
 
 load("/scratch/project_2000994/PREBASruns/assessCarbon/data/traningSites.rdata")
 segIDx <- extract(rastX,data2019[S2Tile==tileX,.(XCOORD,YCOORD)])
-data2019[S2Tile==tileX,segID:=segIDx]
-setkey(data2019,segID)
+setkey(dataX,segID)
+setkey(XYsegID,segID)
 setkey(pMvNorm,segID)
 
 pMvNorm$varNam <- rep(
@@ -38,7 +38,7 @@ pMvNorm$varNam <- rep(
     "HDA2019","DDA2019","BDA2019","perPDA2019","perSPDA2019","perBDA2019",rep("varcov3",36)),
   times = nrow(pMvNorm)/126)
 
-oo <- merge(data2019, pMvNorm[varNam=="Hm2019",1:2], by.x = "segID", 
+oo <- merge(XYsegID, pMvNorm[varNam=="Hm2019",1:2], by.x = "segID", 
       by.y = "segID", all.x = TRUE, all.y = FALSE)
 
 setkey(XYsegID,segID)

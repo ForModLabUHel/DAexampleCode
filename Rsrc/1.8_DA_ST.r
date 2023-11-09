@@ -1,159 +1,90 @@
-# Run settings 
+# Run setting file 
 library(devtools)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/DAexampleCode/master/Rsrc/settings.r")
-# if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings file from local directory if one exists
 
-# Run functions 
+# load file with functions
 source_url("https://raw.githubusercontent.com/ForModLabUHel/DAexampleCode/master/Rsrc/functions.r")
 
+nSample = 1000 ###number of samples from the error distribution
 
 ###check and create output directories
-mkfldr <- paste0(procDataPath,"init",startingYear,"/calST_split/")
-if(!dir.exists(file.path(mkfldr))){
-  dir.create(file.path(mkfldr), recursive = TRUE)
-}
-setwd(generalPath)
+# # mkfldr <- paste0(procDataPath,"init",startingYear,"/calST_split/")
+# if(!dir.exists(file.path(mkfldr))){
+#   dir.create(file.path(mkfldr), recursive = TRUE)
+# }
+# setwd(generalPath)
 
-yearX <- 3
-nSample = 1000 ###number of samples from the error distribution
+# yearX <- 3
 # Load unique data.
 # If data is processed in split parts, define to variable split_id which split part to process (in batch job script).
 # If splitRun is not needed, the unique data dataset for the whole tile is loaded.
-  load(paste0("procData/init",startingYear,"/DA",year2,"/allData.rdata"))  
-
+####load input data
+##!! I can make a script that process the rasters
+load(url("https://raw.githubusercontent.com/ForModLabUHel/DAexampleCode/master/procData/init2016/DA2019/allData.rdata"))
 
 ####load error models
 load(url("https://raw.githubusercontent.com/ForModLabUHel/DAexampleCode/master/data/inputUncer.rdata"))
 load(url("https://raw.githubusercontent.com/ForModLabUHel/DAexampleCode/master/data/logisticPureF.rdata"))
 load(url("https://raw.githubusercontent.com/ForModLabUHel/DAexampleCode/master/data/step.probit.rdata"))
-###load surrMods  ###change name
-load("data/surMod.rdata")
-data.all <- data.all[ba>0]
+###load PREBAS emulators
+load(url("https://raw.githubusercontent.com/ForModLabUHel/DAexampleCode/master/data/surMod.rdata"))
 
+####process the input data
+data.all <- data.all[ba>0]
 data.all[,BAp:= (ba * pineP/(pineP+spruceP+blp))]
 data.all[,BAsp:= (ba * spruceP/(pineP+spruceP+blp))]
 data.all[,BAb:= (ba * blp/(pineP+spruceP+blp))]
 data.all$V <- data.all$v2 - (data.all$dVy*nYears)
-
+data.all[,BAp2:= (ba2 * pineP2/(pineP2+spruceP2+blp2))]
+data.all[,BAsp2:= (ba2 * spruceP2/(pineP2+spruceP2+blp2))]
+data.all[,BAb2:= (ba2 * blp2/(pineP2+spruceP2+blp2))]
+data.all <- data.all[ba>0]
+# 
 dataSurMod <- data.all[,.(segID,h,dbh,BAp,BAsp,BAb,siteType1,
-                            siteType2,v2,ba2,h2,dbh2,V)] 
+                          siteType2,v2,ba2,h2,dbh2,
+                          BAp2,BAsp2,BAb2,V)]
 setnames(dataSurMod,c("segID","H","D","BAp","BAsp","BAb","st1",
-                      "st2","V2","ba2","h2","dbh2","V"))
-
+                      "st2","V2","ba2","h2","dbh2",
+                      "BAp2","BAsp2","BAb2","V"))
 
 dataSurMod[,BApPer:=.(BAp/sum(BAp,BAsp,BAb)*100),by=segID]
 dataSurMod[,BAspPer:=.(BAsp/sum(BAp,BAsp,BAb)*100),by=segID]
 dataSurMod[,BAbPer:=.(BAb/sum(BAp,BAsp,BAb)*100),by=segID]
 dataSurMod[,BAtot:=.(sum(BAp,BAsp,BAb)),by=segID]
+dataSurMod[,BApPer2:=.(BAp2/sum(BAp2,BAsp2,BAb2)*100),by=segID]
+dataSurMod[,BAspPer2:=.(BAsp2/sum(BAp2,BAsp2,BAb2)*100),by=segID]
+dataSurMod[,BAbPer2:=.(BAb2/sum(BAp2,BAsp2,BAb2)*100),by=segID]
+dataSurMod[,BAtot2:=.(sum(BAp2,BAsp2,BAb2)),by=segID]
 
 
 nSeg <- nrow(dataSurMod)  ##200
 stProbMod <- matrix(NA,nSeg,6)
 colnames(stProbMod) <- c("segID",paste0("pST",1:5))
 
+#calculate the probability for each site fertility class at pixel level based on Bayesian model comparison
+system.time({
   for(i in 1:nSeg){
     stProbMod[i,] <- pSTx(dataSurMod[i],nSample,startingYear,year2,tileX)
     # if (i %% 100 == 0) { print(i) }
   }
   stProbMod <- data.table(stProbMod)
-# print("I'm here")
-# # save(stProbMod, file = paste0(procDataPath,"init",startingYear,"/calST_split/stProbMod_TEST_",split_id,".rdata"))
-# if (splitRun) {
-#   ###calculate probit2016
-#   
-#   dataSurMod[,st:=st1]
-#   
-#   step.probit1 <- step.probit[[paste0("y",startingYear)]][[paste0("t",tileX)]]
-#   if(is.null(step.probit1)) step.probit1 <- step.probit[[paste0("y",startingYear)]][["all"]]
-#   if(is.null(step.probit1)) step.probit1 <- step.probit[["all"]]
-#   probit1 <- predict(step.probit1,type='p',dataSurMod[1:nSeg,])
-# 
-#   ###calculate probit2019
-#   dataSurMod[,st:=st2]
-#   step.probit2 <- step.probit[[paste0("y",year2)]][[paste0("t",tileX)]]
-#   if(is.null(step.probit2)) step.probit2 <- step.probit[[paste0("y",year2)]][["all"]]
-#   if(is.null(step.probit2)) step.probit2 <- step.probit[["all"]]
-#   probit2 <- predict(step.probit2,type='p',dataSurMod[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data  },### needs to be changed . We need to calculate with 2016 and 2019 data  },
-# 
-#   stProb <- array(NA, dim=c(nSeg,5,3))
-#   stProb[,,1] <- probit1
-#   stProb[,,2] <- probit2
-#   stProb[,,3] <- as.matrix(stProbMod[,2:6])
-#   
-#   stProb <- apply(stProb, c(1,2), mean)
-#   stProb <- cbind(dataSurMod$segID,stProb)
-#   colnames(stProb) <- colnames(stProbMod)
-#   
-#   save(stProb,probit1,probit2,stProbMod, file = paste0(procDataPath,"init",startingYear,"/calST_split/stProbMod",split_id,".rdata"))
-#   # save(stProb,probit1,probit2,dataSurMod, file = paste0(procDataPath,"init",startingYear,"/calST_split/dataSurMod",split_id,".rdata"))
-#   
-#   # If split_id is not highest of the range, processing is stopped here. Continue by sending remaining parts of split data to processing
-#   
-#   # if(split_id == max(splitRange)){ 
-#   #   
-#   #   # When the split part with highest id number is processed, stProbMod and dataSurMod of all of the split parts 
-#   #   # are combined before continuing processing
-#   #   
-#   #   # Create empty data tables to where the combined data is added
-#   #   stProbMod_bind <- data.table()
-#   #   dataSurMod_bind <- data.table()
-#   #   
-#   #   # Iterate through stProbMod and dataSurMod data tables of the split parts. 
-#   #   # Bind split parts to a single data table 
-#   #   for (i in splitRange) {
-#   #     stProbMod_fileX <- load(paste0("procData/init",startingYear,"/calST_split/stProbMod",i,".rdata"))
-#   #     dataSurMod_fileX <- load(paste0("procData/init",startingYear,"/calST_split/dataSurMod",i,".rdata"))
-#   #     stProbMod_split <- get(stProbMod_fileX)
-#   #     rm(list = stProbMod_fileX)
-#   #     rm(stProbMod_fileX)
-#   #     dataSurMod_split <- get(dataSurMod_fileX)
-#   #     rm(list = dataSurMod_fileX)
-#   #     rm(dataSurMod_fileX)
-#   #     
-#   #     stProbMod_bind <- rbindlist(list(stProbMod_bind, stProbMod_split))
-#   #     dataSurMod_bind <- rbindlist(list(dataSurMod_bind, dataSurMod_split))
-#   #     
-#   #     rm(stProbMod_split, dataSurMod_split)
-#   #   }
-#   #   
-#   #   stProbMod <- stProbMod_bind
-#   #   dataSurMod <- dataSurMod_bind
-#   #   
-#   #   nSeg <- nrow(dataSurMod) # define nSeg again after length of dataSurMod has changed
-#   #   
-#   #   ###calculate probit2016
-#   #   dataSurMod[,st:=st1]
-#   #   step.probit1 <- step.probit[[paste0("y",startingYear)]][[paste0("t",tileX)]]
-#   #   probit1 <- predict(step.probit1,type='p',dataSurMod[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
-#   #   
-#   #   ###calculate probit2019
-#   #   dataSurMod[,st:=st2]
-#   #   step.probit2 <- step.probit[[paste0("y",year2)]][[paste0("t",tileX)]]
-#   #   probit2 <- predict(step.probit2,type='p',dataSurMod[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
-#   #   
-#   #   stProb <- array(NA, dim=c(nSeg,5,3))
-#   #   stProb[,,1] <- probit1
-#   #   stProb[,,2] <- probit2
-#   #   stProb[,,3] <- as.matrix(stProbMod[,2:6])
-#   #   
-#   #   stProb <- apply(stProb, c(1,2), mean)
-#   #   stProb <- cbind(dataSurMod$segID,stProb)
-#   #   colnames(stProb) <- colnames(stProbMod)
-#   #   save(stProb,probit1,probit2,stProbMod,file="stProbMod.rdata")
-#   # }  
-#   
-# } else { ### if splitRun = F
-  
-  ###calculate probit2016
+})
+
+
+  # Calculate the probability for each site fertility class at pixel level 
+  # based on 2016 s2 data
   dataSurMod[,st:=st1]
   step.probit1 <- step.probit[[paste0("y",startingYear)]][[paste0("t",tileX)]]
   probit1 <- predict(step.probit1,type='p',dataSurMod[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
   
-  ###calculate probit2019
+  # Calculate the probability for each site fertility class at pixel level 
+  # based on 2019 s2 data
   dataSurMod[,st:=st2]
   step.probit2 <- step.probit[[paste0("y",year2)]][[paste0("t",tileX)]]
   probit2 <- predict(step.probit2,type='p',dataSurMod[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
   
+  
+  ###combine the different sources of information
   stProb <- array(NA, dim=c(nSeg,5,3))
   stProb[,,1] <- probit1
   stProb[,,2] <- probit2
@@ -162,6 +93,12 @@ colnames(stProbMod) <- c("segID",paste0("pST",1:5))
   stProb <- apply(stProb, c(1,2), mean)
   stProb <- cbind(dataSurMod$segID,stProb)
   colnames(stProb) <- colnames(stProbMod)
-  save(stProb,probit1,probit2,stProbMod,file="data/stProbMod.rdata")
-
+  
+  dataSurMod <- merge(dataSurMod,stProb)
+  
+  pMvNorm <- data.table()
+  system.time({
+    pMvNorm <- dataSurMod[, pSVDA(.SD,nSample = nSample,year1=startingYear,
+                                  year2=year2,tileX=tileX), by = segID]
+  })
 
